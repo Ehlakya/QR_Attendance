@@ -14,15 +14,19 @@ import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { Toaster } from 'react-hot-toast';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'your_google_client_id_here';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-    <AuthProvider>
-      <SocketProvider>
-        <App />
-        <Toaster position="top-right" />
-      </SocketProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <SocketProvider>
+          <App />
+          <Toaster position="top-right" />
+        </SocketProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </GoogleOAuthProvider>
 )

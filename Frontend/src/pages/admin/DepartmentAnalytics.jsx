@@ -34,7 +34,7 @@ const SECTION_COLUMNS = [
   { header: 'Total Students', accessor: 'total' },
   { header: 'Present', accessor: 'present' },
   { header: 'Absent', accessor: 'absent' },
-  { header: 'Attendance %', accessor: 'percentage', cell: (row) => <span className="font-semibold text-gray-900">{row.percentage}%</span> }
+  { header: 'Attendance %', accessor: 'percentage', cell: (row) => <span className="font-semibold text-textPrimary">{row.percentage}%</span> }
 ];
 
 const SECTION_DATA = [
@@ -81,16 +81,16 @@ const DepartmentAnalytics = () => {
           <div className="flex items-center gap-2 text-sm text-textSecondary mb-2">
             <Link to="/admin" className="hover:text-primary transition-colors">Dashboard</Link>
             <ChevronRight className="w-4 h-4" />
-            <span className="text-gray-900 font-medium">Computer Science Dept</span>
+            <span className="text-textPrimary font-medium">Computer Science Dept</span>
           </div>
-          <h2 className="text-2xl font-bold tracking-tight">Department Analytics</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-textPrimary">Department Analytics</h2>
         </div>
 
         <div className="flex items-center gap-3">
           <select 
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="input py-2 w-40 bg-white"
+            className="input py-2 w-40 bg-card text-textPrimary"
           >
             <option value="today">Today</option>
             <option value="yesterday">Yesterday</option>

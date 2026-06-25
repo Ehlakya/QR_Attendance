@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
@@ -142,19 +143,21 @@ const Sidebar = () => {
   const navItems = getNavItems(user?.role);
 
   return (
-    <aside className="w-full h-full bg-white border-r border-gray-200 flex flex-col">
+    <aside className="w-full h-full bg-card border-r border-border flex flex-col transition-colors duration-300">
       <div className="p-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.4)]">
             <QrCode className="text-white w-5 h-5" />
           </div>
-          <span className="text-xl font-bold text-gray-900 tracking-tight">QR Attend</span>
+          <span className="text-xl font-bold text-textPrimary tracking-tight">QR Attend</span>
         </div>
       </div>
-      
       <nav className="flex-1 px-4 pb-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path || (item.path !== '/admin' && location.pathname.startsWith(`${item.path}/`));
+          const isBaseDashboard = ['/admin', '/teacher', '/hod', '/student'].includes(item.path);
+          const isActive = isBaseDashboard 
+            ? location.pathname === item.path 
+            : location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
           const Icon = item.icon;
           const hasSub = item.subItems && item.subItems.length > 0;
           const isExpanded = expanded[item.name];
@@ -162,40 +165,44 @@ const Sidebar = () => {
           return (
             <div key={item.name} className="mb-1">
               {hasSub ? (
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => toggleExpand(item.name)}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                    isActive ? "bg-primary/5 text-primary" : "text-textSecondary hover:bg-gray-50 hover:text-gray-900"
+                    "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300",
+                    isActive ? "bg-primary/10 text-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "text-textSecondary hover:bg-black/5 dark:hover:bg-white/5 hover:text-textPrimary"
                   )}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-gray-400")} />
+                    <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-textSecondary/60")} />
                     <span>{item.name}</span>
                   </div>
-                  {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
-                </button>
+                  {isExpanded ? <ChevronDown className="w-4 h-4 text-textSecondary/60" /> : <ChevronRight className="w-4 h-4 text-textSecondary/60" />}
+                </motion.button>
               ) : (
-                <Link
-                  to={item.path}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                    isActive ? "bg-primary/10 text-primary" : "text-textSecondary hover:bg-gray-50 hover:text-gray-900"
-                  )}
-                >
-                  <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-gray-400")} />
-                  <span>{item.name}</span>
-                </Link>
+                <motion.div whileHover={{ scale: 1.02, x: 2 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    to={item.path}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300",
+                      isActive ? "bg-primary/10 text-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "text-textSecondary hover:bg-black/5 dark:hover:bg-white/5 hover:text-textPrimary"
+                    )}
+                  >
+                    <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-textSecondary/60")} />
+                    <span>{item.name}</span>
+                  </Link>
+                </motion.div>
               )}
 
               {/* Sub Items */}
               {hasSub && isExpanded && (
-                <div className="mt-1 ml-9 space-y-1 border-l-2 border-gray-100 pl-3">
+                <div className="mt-1 ml-9 space-y-1 border-l-2 border-border pl-3">
                   {item.subItems.map((sub, idx) => (
                     <Link
                       key={idx}
                       to={sub.path}
-                      className="block px-3 py-2 rounded-md text-xs font-medium text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                      className="block px-3 py-2 rounded-md text-xs font-medium text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors"
                     >
                       • {sub.name}
                     </Link>
@@ -207,19 +214,19 @@ const Sidebar = () => {
         })}
       </nav>
       
-      <div className="p-4 border-t border-gray-200 bg-gray-50/50 mt-auto">
+      <div className="p-4 border-t border-border bg-background/50 mt-auto backdrop-blur-sm">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex flex-shrink-0 items-center justify-center text-primary font-bold">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex flex-shrink-0 items-center justify-center text-primary font-bold shadow-inner">
               {user?.name?.charAt(0) || 'U'}
             </div>
             <div className="overflow-hidden">
-              <p className="text-sm font-medium text-gray-900 truncate">{user?.name || 'User'}</p>
-              <p className="text-xs text-textSecondary truncate">{user?.role || 'Role'}</p>
+              <p className="text-sm font-bold text-textPrimary truncate">{user?.name || 'User'}</p>
+              <p className="text-xs font-medium text-textSecondary truncate">{user?.role || 'Role'}</p>
             </div>
           </div>
           <button 
-            className="text-xs text-danger font-medium hover:underline"
+            className="text-xs text-danger font-bold hover:underline"
             onClick={() => {/* logout handler typically from useAuth */}}
           >
             Logout

@@ -49,8 +49,8 @@ const StudentDashboard = () => {
       ) {
         toast((t) => (
           <div className="flex flex-col gap-2 p-1">
-            <div className="font-bold text-gray-900">{data.message}</div>
-            <div className="text-sm text-gray-600">
+            <div className="font-bold text-textPrimary">{data.message}</div>
+            <div className="text-sm text-textSecondary">
               {data.type === 'Subject Attendance' && (
                 <div className="mb-1">
                   <span className="font-semibold">Subject:</span> {data.subjectName} (Hour: {data.period})
