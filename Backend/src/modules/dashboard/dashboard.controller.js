@@ -583,6 +583,8 @@ const getTeacherStudents = async (req, res, next) => {
         year: s.year || 'N/A',
         section: s.Section?.name || 'N/A',
         semester: s.semester || 'N/A',
+        presentDays: sPresentCount,
+        absentDays: sTotalClasses - sPresentCount,
         attendancePercentage,
         todaysStatus
       };

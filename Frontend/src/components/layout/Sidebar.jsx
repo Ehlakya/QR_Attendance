@@ -116,7 +116,7 @@ const Sidebar = () => {
       case 'HOD':
         return [
           { name: 'Dashboard', path: '/hod', icon: LayoutDashboard },
-          { name: 'Dept Attendance', path: '/hod/attendance', icon: ClipboardList },
+          { name: 'Department Attendance', path: '/teacher/department-attendance', icon: ClipboardList },
           { name: 'Students', path: '/hod/students', icon: Users },
           { name: 'QR Generator', path: '/hod/qr', icon: QrCode },
           { name: '6-Month Report', path: '/analytics/6-month', icon: Activity },
@@ -125,6 +125,7 @@ const Sidebar = () => {
       case 'Class Teacher':
         return [
           { name: 'Dashboard', path: '/teacher', icon: LayoutDashboard },
+          { name: 'Department Attendance', path: '/teacher/department-attendance', icon: ClipboardList },
           { name: 'Students', path: '/teacher/students', icon: Users },
           { name: 'Morning QR', path: '/teacher/qr', icon: QrCode },
           { name: 'Live Monitor', path: '/teacher/live-monitor', icon: Activity },

@@ -9,6 +9,7 @@ import DepartmentAttendance from './pages/admin/DepartmentAttendance';
 import HODDashboard from './pages/hod/HODDashboard';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import TeacherStudents from './pages/teacher/TeacherStudents';
+import DepartmentAttendanceTeacher from './pages/teacher/DepartmentAttendanceTeacher';
 import SubjectAttendance from './pages/teacher/SubjectAttendance';
 import StudentDashboard from './pages/student/StudentDashboard';
 import QRGenerator from './pages/shared/QRGenerator';
@@ -61,6 +62,12 @@ function App() {
         </Route>
 
         {/* Teacher Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['Class Teacher', 'HOD']} />}>
+          <Route element={<Layout />}>
+            <Route path="/teacher/department-attendance" element={<DepartmentAttendanceTeacher />} />
+          </Route>
+        </Route>
+
         <Route element={<ProtectedRoute allowedRoles={['Class Teacher', 'Subject Teacher', 'HOD', 'admin']} />}>
           <Route element={<Layout />}>
             <Route path="/teacher" element={<TeacherDashboard />} />
