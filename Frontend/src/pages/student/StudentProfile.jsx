@@ -317,7 +317,15 @@ const StudentProfile = () => {
                 </div>
                 <div>
                   <label className="label">Mobile Number</label>
-                  <input type="text" value={editForm.mobile} onChange={e => setEditForm({...editForm, mobile: e.target.value})} className="input" />
+                  <input 
+                    type="tel" 
+                    maxLength="10" 
+                    pattern="\d{10}"
+                    title="Mobile number must be exactly 10 digits"
+                    value={editForm.mobile} 
+                    onChange={e => setEditForm({...editForm, mobile: e.target.value.replace(/\D/g, '').slice(0, 10)})} 
+                    className="input" 
+                  />
                 </div>
                 <div className="pt-4 border-t border-gray-100 bg-gray-50/50 -mx-6 px-6 -mb-6 pb-6 rounded-b-xl flex justify-end gap-3 mt-6">
                   <button type="button" onClick={() => setIsEditModalOpen(false)} className="btn-secondary">Cancel</button>

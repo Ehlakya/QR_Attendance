@@ -68,10 +68,70 @@ const deleteTeacher = async (req, res, next) => {
   }
 };
 
+const TeacherSubject = require('../../models/TeacherSubject');
+
+const assignSubjects = async (req, res, next) => {
+  try {
+    const { subjects, departmentId, sectionId, semester } = req.body;
+    const teacherId = req.user.id;
+
+    if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
+      throw new ApiError(400, 'At least one subject must be selected');
+    }
+
+    if (!semester) {
+      throw new ApiError(400, 'Semester is required');
+    }
+
+    const assignments = subjects.map(subject => ({
+      teacherId,
+      subjectName: subject.name,
+      subjectType: subject.type,
+      semester,
+      departmentId: departmentId || null,
+      sectionId: sectionId || null
+    }));
+
+    for (const assignment of assignments) {
+      const existing = await TeacherSubject.findOne({
+        where: {
+          teacherId,
+          subjectName: assignment.subjectName,
+          semester: assignment.semester,
+          sectionId: assignment.sectionId
+        }
+      });
+      
+      if (!existing) {
+        await TeacherSubject.create(assignment);
+      }
+    }
+
+    return sendResponse(res, 201, 'Subjects assigned successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAssignedSubjects = async (req, res, next) => {
+  try {
+    const teacherId = req.user.id;
+    const subjects = await TeacherSubject.findAll({
+      where: { teacherId }
+    });
+    
+    return sendResponse(res, 200, 'Assigned subjects retrieved', subjects);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createTeacher,
   getAllTeachers,
   getTeacherById,
   updateTeacher,
-  deleteTeacher
+  deleteTeacher,
+  assignSubjects,
+  getAssignedSubjects
 };

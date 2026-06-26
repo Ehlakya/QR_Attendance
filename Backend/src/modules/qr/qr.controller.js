@@ -8,54 +8,61 @@ const { Op } = require('sequelize');
 
 const generateQR = async (req, res, next) => {
   try {
-    const { type, expiryMinutes, departmentId, sectionId, subjectName, period } = req.body;
+    const { type, expiryMinutes, departmentIds, sectionId, subjectName, period } = req.body;
     const teacherId = req.user.id;
 
-    // Generate a unique token for the QR
+    if (!departmentIds || !Array.isArray(departmentIds) || departmentIds.length === 0) {
+      throw new ApiError(400, 'At least one department must be selected');
+    }
+
+    // Generate a unique token for the QR that includes ALL department IDs
     const qrData = JSON.stringify({
       id: uuidv4(),
       type,
       teacherId,
-      departmentId,
+      departmentIds,
       sectionId,
       subjectName,
       period,
       timestamp: Date.now()
     });
 
-    // Create QR image base64
+    // Create a single shared QR image base64
     const qrCodeImage = await QRCode.toDataURL(qrData);
-
     const expiryTime = new Date(Date.now() + (expiryMinutes || 10) * 60000);
-
-    // Store in DB
-    const qrRecord = await QR.create({
-      type,
-      qrCodeData: qrData,
-      expiryTime,
-      teacherId,
-      departmentId,
-      sectionId,
-      subjectName,
-      period
-    });
-
-    // Emit targeted socket event globally (frontend will filter by departmentId and sectionId)
+    const qrRecords = [];
     const io = require('../../config/socket').getIO();
-    io.emit('qr_generated', {
-      qrId: qrRecord.id,
-      type,
-      departmentId,
-      sectionId,
-      subjectName,
-      period,
-      message: type === 'Subject Attendance' 
-        ? `Subject Attendance QR Available` 
-        : `Morning Attendance QR Available`
-    });
+
+    // Create a DB record for EACH department to allow students in those departments to find it
+    for (const dId of departmentIds) {
+      const qrRecord = await QR.create({
+        type,
+        qrCodeData: qrData,
+        expiryTime,
+        teacherId,
+        departmentId: dId,
+        sectionId,
+        subjectName,
+        period
+      });
+      qrRecords.push(qrRecord);
+
+      // Emit targeted socket event globally (frontend filters by departmentId and sectionId)
+      io.emit('qr_generated', {
+        qrId: qrRecord.id,
+        type,
+        departmentId: dId,
+        sectionId,
+        subjectName,
+        period,
+        message: type === 'Subject Attendance' 
+          ? `Subject Attendance QR Available` 
+          : `Morning Attendance QR Available`
+      });
+    }
 
     return sendResponse(res, 201, 'QR Code generated successfully', {
-      qrId: qrRecord.id,
+      qrId: qrRecords[0].id,
       qrCodeImage,
       expiryTime
     });

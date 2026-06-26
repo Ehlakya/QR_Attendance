@@ -8,8 +8,7 @@ const TeacherDashboard = () => {
   const { user } = useAuth();
   
   // In a full implementation, we'd use user.sectionId.
-  // For the mock, we default to 1 (Section A)
-  const sectionId = user?.sectionId || 1;
+  const sectionId = user?.sectionId || null;
 
   return (
     <div className="space-y-6">

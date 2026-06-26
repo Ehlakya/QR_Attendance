@@ -8,7 +8,7 @@ import { cn } from '../../utils/cn';
 import { 
   LayoutDashboard, Users, UserCog, Building2, 
   Layers, QrCode, ClipboardList, Bell, Settings,
-  ChevronDown, ChevronRight, Activity
+  ChevronDown, ChevronRight, Activity, BookOpen
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -103,6 +103,11 @@ const Sidebar = () => {
             badge: counts.attendance
           },
           { 
+            name: '6-Month Report', 
+            path: '/analytics/6-month', 
+            icon: Activity 
+          },
+          { 
             name: 'Details', 
             path: '/admin/details', 
             icon: Layers
@@ -115,6 +120,8 @@ const Sidebar = () => {
           { name: 'Sections', path: '/hod/sections', icon: Layers },
           { name: 'Students', path: '/hod/students', icon: Users },
           { name: 'QR Generator', path: '/hod/qr', icon: QrCode },
+          { name: '6-Month Report', path: '/analytics/6-month', icon: Activity },
+          { name: 'Manage Subjects', path: '/teacher/subjects', icon: BookOpen },
         ];
       case 'Class Teacher':
         return [
@@ -122,12 +129,14 @@ const Sidebar = () => {
           { name: 'Students', path: '/teacher/students', icon: Users },
           { name: 'Morning QR', path: '/teacher/qr', icon: QrCode },
           { name: 'Live Monitor', path: '/teacher/live-monitor', icon: Activity },
+          { name: '6-Month Report', path: '/analytics/6-month', icon: Activity },
         ];
       case 'Subject Teacher':
         return [
           { name: 'Dashboard', path: '/teacher', icon: LayoutDashboard },
           { name: 'QR Generator', path: '/teacher/qr', icon: QrCode },
           { name: 'Live Monitor', path: '/teacher/live-monitor', icon: Activity },
+          { name: '6-Month Report', path: '/analytics/6-month', icon: Activity },
         ];
       case 'Student':
         return [
@@ -170,8 +179,8 @@ const Sidebar = () => {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => toggleExpand(item.name)}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300",
-                    isActive ? "bg-primary/10 text-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "text-textSecondary hover:bg-black/5 dark:hover:bg-white/5 hover:text-textPrimary"
+                    "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 border-l-4 border-transparent",
+                    isActive ? "bg-primary/10 text-primary border-l-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "text-textSecondary hover:bg-primary/5 dark:hover:bg-primary/10 hover:text-textPrimary hover:border-l-primary/50"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -185,8 +194,8 @@ const Sidebar = () => {
                   <Link
                     to={item.path}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300",
-                      isActive ? "bg-primary/10 text-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "text-textSecondary hover:bg-black/5 dark:hover:bg-white/5 hover:text-textPrimary"
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 border-l-4 border-transparent",
+                      isActive ? "bg-primary/10 text-primary border-l-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "text-textSecondary hover:bg-primary/5 dark:hover:bg-primary/10 hover:text-textPrimary hover:border-l-primary/50"
                     )}
                   >
                     <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-textSecondary/60")} />

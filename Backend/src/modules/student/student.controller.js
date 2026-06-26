@@ -159,14 +159,40 @@ const changePassword = async (req, res, next) => {
 };
 
 // Get all students
+const TeacherSubject = require('../../models/TeacherSubject');
+
 const getAllStudents = async (req, res, next) => {
   try {
-    const { status, departmentId, sectionId } = req.query;
+    const { status, departmentId, sectionId, search } = req.query;
+    const { Op } = require('sequelize');
+    const user = req.user;
     let whereClause = {};
 
     if (status) whereClause.status = status;
     if (departmentId) whereClause.departmentId = departmentId;
     if (sectionId) whereClause.sectionId = sectionId;
+
+    if (search) {
+      whereClause[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { registerNumber: { [Op.like]: `%${search}%` } }
+      ];
+    }
+
+    if (user && user.role === 'Subject Teacher') {
+      const assignedSubjects = await TeacherSubject.findAll({ where: { teacherId: user.id } });
+      const allowedDeptIds = [...new Set(assignedSubjects.map(s => s.departmentId).filter(Boolean))];
+      const allowedSecIds = [...new Set(assignedSubjects.map(s => s.sectionId).filter(Boolean))];
+
+      if (allowedDeptIds.length > 0) whereClause.departmentId = { [Op.in]: allowedDeptIds };
+      if (allowedSecIds.length > 0) whereClause.sectionId = { [Op.in]: allowedSecIds };
+    } else if (user && (user.role === 'HOD' || user.role === 'Class Teacher')) {
+      const Teacher = require('../../models/Teacher');
+      const teacher = await Teacher.findByPk(user.id);
+      if (teacher && teacher.departmentId && teacher.departmentId !== 1 && teacher.departmentId !== '1') {
+        whereClause.departmentId = teacher.departmentId;
+      }
+    }
 
     // We include associations so the frontend can display them nicely
     const Department = require('../../models/Department');

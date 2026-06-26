@@ -8,8 +8,7 @@ const HODDashboard = () => {
   const { user } = useAuth();
   
   // In a full implementation, we'd use user.departmentId.
-  // For the mock, we default to 1 (Computer Science)
-  const deptId = user?.departmentId || 1;
+  const deptId = user?.departmentId || null;
 
   return (
     <div className="space-y-6">

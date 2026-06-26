@@ -1,61 +1,42 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/common/Card';
-import { QrCode, Download, Loader2 } from 'lucide-react';
+import { QrCode, Download, Loader2, Building2 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
+import { DepartmentSelectionModal } from '../../components/shared/DepartmentSelectionModal';
+import { MASTER_DEPARTMENTS } from '../../constants/departments';
 
 const QRGenerator = () => {
   const { register, handleSubmit, watch } = useForm({
     defaultValues: {
       type: 'Morning Attendance',
       expiryMinutes: 10,
-      departmentId: '1',
       sectionId: '1'
     }
   });
   const [generatedQR, setGeneratedQR] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDepartments, setSelectedDepartments] = useState([]);
   const { token } = useAuth();
 
   const watchType = watch('type');
 
-  const triggerConfetti = () => {
-    const end = Date.now() + 1.5 * 1000;
-    const colors = ['#6366F1', '#10B981', '#F59E0B'];
-
-    (function frame() {
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: colors
-      });
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: colors
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    }());
-  };
-
   const onSubmit = async (data) => {
+    if (selectedDepartments.length === 0) {
+      toast.error('Please select at least one department');
+      return;
+    }
+
     setIsGenerating(true);
     try {
       const payload = {
         type: data.type,
         expiryMinutes: parseInt(data.expiryMinutes),
-        departmentId: parseInt(data.departmentId),
+        departmentIds: selectedDepartments,
         sectionId: parseInt(data.sectionId),
       };
 
@@ -69,19 +50,18 @@ const QRGenerator = () => {
       });
       
       setGeneratedQR({
-        qrId: response.data.data.qrId,
+        qrId: response.data.data.qrId, // Primary or generic QR ID
         dataUrl: response.data.data.qrCodeImage,
         timestamp: new Date().toLocaleTimeString(),
         expiry: new Date(response.data.data.expiryTime).toLocaleTimeString(),
         type: data.type,
-        departmentId: data.departmentId,
+        departmentIds: selectedDepartments,
         sectionId: data.sectionId,
         subjectName: data.subjectName,
         period: data.period
       });
       
-      toast.success('QR Code Generated Successfully!');
-      triggerConfetti();
+      toast.success(`QR Code Generated for ${selectedDepartments.length} department(s)!`);
 
     } catch (error) {
       toast.error('Failed to generate QR Code');
@@ -130,12 +110,36 @@ const QRGenerator = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-textPrimary mb-1">Department <span className="text-danger">*</span></label>
-                    <select {...register('departmentId', { required: true })} className="input bg-background/50 focus:bg-background text-textPrimary border-border transition-colors">
-                      <option value="1">CSE</option>
-                      <option value="2">IT</option>
-                      <option value="3">ECE</option>
-                    </select>
+                    <label className="block text-sm font-semibold text-textPrimary mb-1">Departments <span className="text-danger">*</span></label>
+                    <button 
+                      type="button"
+                      onClick={() => setIsModalOpen(true)}
+                      className="w-full text-left px-4 py-2.5 rounded-xl border border-border bg-background hover:bg-background/80 transition-colors text-textPrimary flex justify-between items-center"
+                    >
+                      <span className="truncate flex-1">
+                        {selectedDepartments.length === 0 
+                          ? 'Select Departments...' 
+                          : `${selectedDepartments.length} Selected`}
+                      </span>
+                      <Building2 className="w-4 h-4 text-textSecondary flex-shrink-0" />
+                    </button>
+                    {selectedDepartments.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {selectedDepartments.slice(0, 3).map(id => {
+                          const dept = MASTER_DEPARTMENTS.find(d => d.id === id);
+                          return (
+                            <span key={id} className="text-[10px] font-bold bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                              {dept?.abbr || id}
+                            </span>
+                          );
+                        })}
+                        {selectedDepartments.length > 3 && (
+                          <span className="text-[10px] font-bold bg-border text-textSecondary px-1.5 py-0.5 rounded">
+                            +{selectedDepartments.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-textPrimary mb-1">Section <span className="text-danger">*</span></label>
@@ -145,6 +149,13 @@ const QRGenerator = () => {
                     </select>
                   </div>
                 </div>
+
+                <DepartmentSelectionModal 
+                  isOpen={isModalOpen}
+                  onClose={() => setIsModalOpen(false)}
+                  selectedIds={selectedDepartments}
+                  onConfirm={(ids) => setSelectedDepartments(ids)}
+                />
 
                 <AnimatePresence>
                   {watchType === 'Subject Attendance' && (
@@ -218,15 +229,19 @@ const QRGenerator = () => {
                 {generatedQR ? (
                   <motion.div 
                     key="qr"
-                    initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
                     className="text-center w-full"
                   >
-                    <div className="bg-white p-5 rounded-2xl shadow-xl border border-gray-100 inline-block mb-6 relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                      <img src={generatedQR.dataUrl} alt="QR Code" className="w-56 h-56" />
-                    </div>
+                    <motion.div 
+                      initial={{ boxShadow: '0px 0px 0px rgba(99, 102, 241, 0)' }}
+                      animate={{ boxShadow: '0px 8px 30px rgba(99, 102, 241, 0.25)' }}
+                      transition={{ delay: 0.6, duration: 0.8, ease: "easeIn" }}
+                      className="bg-gradient-to-b from-white to-gray-50 p-5 rounded-2xl border border-gray-100 inline-block mb-6 relative group"
+                    >
+                      <img src={generatedQR.dataUrl} alt="QR Code" className="w-56 h-56 relative z-10" />
+                    </motion.div>
                     <div className="space-y-1.5 mb-8 bg-background rounded-xl p-4 border border-border shadow-inner max-w-xs mx-auto">
                       <p className="text-sm font-bold text-textPrimary">{generatedQR.type}</p>
                       <p className="text-xs font-medium text-textSecondary">Generated: {generatedQR.timestamp}</p>

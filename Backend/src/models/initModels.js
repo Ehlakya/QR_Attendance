@@ -6,6 +6,7 @@ const Student = require('./Student');
 const QR = require('./QR');
 const Attendance = require('./Attendance');
 const Notification = require('./Notification');
+const TeacherSubject = require('./TeacherSubject');
 
 const initModels = () => {
   // Department hasMany Sections
@@ -44,6 +45,16 @@ const initModels = () => {
   // Notification Associations
   Teacher.hasMany(Notification, { foreignKey: 'teacherId' });
   Notification.belongsTo(Teacher, { foreignKey: 'teacherId' });
+
+  // TeacherSubject Associations
+  Teacher.hasMany(TeacherSubject, { foreignKey: 'teacherId' });
+  TeacherSubject.belongsTo(Teacher, { foreignKey: 'teacherId' });
+
+  Department.hasMany(TeacherSubject, { foreignKey: 'departmentId' });
+  TeacherSubject.belongsTo(Department, { foreignKey: 'departmentId' });
+
+  Section.hasMany(TeacherSubject, { foreignKey: 'sectionId' });
+  TeacherSubject.belongsTo(Section, { foreignKey: 'sectionId' });
 };
 
 module.exports = {
@@ -55,5 +66,6 @@ module.exports = {
   Student,
   QR,
   Attendance,
-  Notification
+  Notification,
+  TeacherSubject
 };

@@ -17,6 +17,8 @@ import TeacherManagement from './pages/admin/TeacherManagement';
 import AdminDetails from './pages/admin/AdminDetails';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
 import MonitorLiveAttendance from './pages/teacher/MonitorLiveAttendance';
+import SubjectSelection from './pages/teacher/SubjectSelection';
+import SixMonthDashboard from './pages/shared/SixMonthDashboard';
 
 // Dummy components for now
 const Dashboard = ({ role }) => <div className="p-8 text-xl">{role} Dashboard</div>;
@@ -39,6 +41,7 @@ function App() {
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
             <Route path="/admin/departments/:id" element={<DepartmentAnalytics />} />
             <Route path="/admin/qr" element={<QRGenerator />} />
+            <Route path="/analytics/6-month" element={<SixMonthDashboard />} />
             {/* Add more admin routes here */}
           </Route>
         </Route>
@@ -48,6 +51,8 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/hod" element={<HODDashboard />} />
             <Route path="/hod/qr" element={<QRGenerator />} />
+            <Route path="/analytics/6-month" element={<SixMonthDashboard />} />
+            <Route path="/teacher/subjects" element={<SubjectSelection />} />
           </Route>
         </Route>
 
@@ -58,6 +63,8 @@ function App() {
             <Route path="/teacher/qr" element={<QRGenerator />} />
             <Route path="/teacher/attendance/:qrId" element={<SubjectAttendance />} />
             <Route path="/teacher/live-monitor" element={<MonitorLiveAttendance />} />
+            <Route path="/teacher/subjects" element={<SubjectSelection />} />
+            <Route path="/analytics/6-month" element={<SixMonthDashboard />} />
           </Route>
         </Route>
 

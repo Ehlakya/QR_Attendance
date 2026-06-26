@@ -15,8 +15,8 @@ const PendingRegistrations = ({ departmentId, sectionId }) => {
   const fetchPendingStudents = async () => {
     try {
       let url = 'http://localhost:5000/api/v1/students?status=Pending';
-      if (departmentId) url += `&departmentId=${departmentId}`;
-      if (sectionId) url += `&sectionId=${sectionId}`;
+      if (departmentId && departmentId !== '1' && departmentId !== 1) url += `&departmentId=${departmentId}`;
+      if (sectionId && sectionId !== '1' && sectionId !== 1) url += `&sectionId=${sectionId}`;
 
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` }

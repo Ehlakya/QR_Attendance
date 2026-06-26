@@ -78,15 +78,34 @@
 
 @layer components {
   .card {
-    @apply bg-white/70 backdrop-blur-xl rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 p-6 transition-all duration-300;
+    @apply bg-white/70 backdrop-blur-xl rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 p-6 transition-all duration-300 ease-in-out;
   }
+  .card:hover {
+    @apply bg-white/90 shadow-lg transform scale-[1.02] dark:bg-card/90;
+  }
+
   .input {
-    @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all;
+    @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-300;
   }
+  
   .btn-primary {
-    @apply px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium;
+    @apply px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-300 ease-in-out font-medium hover:shadow-md hover:scale-[1.02];
   }
+  
   .btn-secondary {
-    @apply px-4 py-2 bg-gray-100 text-textPrimary rounded-lg hover:bg-gray-200 transition-colors font-medium;
+    @apply px-4 py-2 bg-gray-100 dark:bg-card text-gray-800 dark:text-textPrimary border border-gray-200 dark:border-border rounded-lg hover:bg-gray-200 dark:hover:bg-border transition-all duration-300 ease-in-out font-medium hover:shadow-md hover:scale-[1.02];
+  }
+
+  button:not(.btn-primary):not(.btn-secondary), a[role="button"] {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  button:hover:not(:disabled):not(.btn-primary):not(.btn-secondary):not(.text-danger), a[role="button"]:hover {
+    @apply transform scale-[1.02] drop-shadow-sm;
+  }
+}
+
+@layer base {
+  tbody tr {
+    @apply transition-colors duration-300 ease-in-out hover:bg-primary/5 dark:hover:bg-primary/10;
   }
 }

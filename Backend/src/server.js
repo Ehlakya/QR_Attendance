@@ -12,7 +12,7 @@ sequelize.authenticate()
     initModels();
     
     // Sync DB (Use { alter: true } to update tables without dropping them)
-    // return sequelize.sync({ alter: true });
+    return sequelize.sync({ alter: true });
   })
   .then(() => {
     const server = app.listen(PORT, () => {

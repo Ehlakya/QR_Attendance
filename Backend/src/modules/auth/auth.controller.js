@@ -79,6 +79,7 @@ const googleLogin = async (req, res, next) => {
 const adminLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    console.log("Admin Login Attempt:", { email, password });
     
     // Hardcoded bypass to guarantee entry and fix the 401 error for root admin
     if (email === 'admin@gmail.com' && password === 'admin@123') {

@@ -31,14 +31,36 @@ const seed = async () => {
     }
 
     // Create Departments
-    const cse = await Department.create({ name: 'Computer Science', code: 'CSE' });
-    const it = await Department.create({ name: 'Information Technology', code: 'IT' });
-    const ece = await Department.create({ name: 'Electronics', code: 'ECE' });
+    const masterDepartments = [
+      { id: 1, name: 'Computer Science and Engineering', code: 'CSE' },
+      { id: 2, name: 'Information Technology', code: 'IT' },
+      { id: 3, name: 'Artificial Intelligence and Machine Learning', code: 'AI & ML' },
+      { id: 4, name: 'Data Science', code: 'DS' },
+      { id: 5, name: 'Cyber Security', code: 'CS' },
+      { id: 6, name: 'Mechanical Engineering', code: 'ME' },
+      { id: 7, name: 'Civil Engineering', code: 'CE' },
+      { id: 8, name: 'Electrical and Electronics Engineering', code: 'EEE' },
+      { id: 9, name: 'Electronics and Communication Engineering', code: 'ECE' },
+      { id: 10, name: 'Chemical Engineering', code: 'ChemE' },
+      { id: 11, name: 'Aerospace Engineering', code: 'AE' },
+      { id: 12, name: 'Biomedical Engineering', code: 'BME' },
+      { id: 13, name: 'Biotechnology', code: 'BT' },
+      { id: 14, name: 'Mechatronics Engineering', code: 'MTE' },
+      { id: 15, name: 'Automobile Engineering', code: 'AutoE' },
+      { id: 16, name: 'Agricultural Engineering', code: 'AgE' },
+      { id: 17, name: 'Marine Engineering', code: 'MarE' },
+      { id: 18, name: 'Textile Technology', code: 'TT' },
+      { id: 19, name: 'Applied Sciences and Humanities', code: 'ASH' },
+      { id: 20, name: 'Mathematics', code: 'Math' },
+      { id: 21, name: 'Physics', code: 'Phy' },
+      { id: 22, name: 'Chemistry', code: 'Chem' }
+    ];
+    await Department.bulkCreate(masterDepartments);
 
-    // Create Sections
+    // Create Sections for CSE (id: 1) as an example
     const Section = require('../models/Section');
-    await Section.create({ name: 'A', departmentId: cse.id });
-    await Section.create({ name: 'B', departmentId: cse.id });
+    await Section.create({ name: 'A', departmentId: 1 });
+    await Section.create({ name: 'B', departmentId: 1 });
 
     console.log('Seed completed successfully');
     process.exit(0);

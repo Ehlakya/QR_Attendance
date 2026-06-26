@@ -4,6 +4,7 @@ import { Loader2, UserPlus, ShieldCheck } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { MASTER_DEPARTMENTS } from '../../constants/departments';
 
 const StudentRegistration = () => {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
@@ -81,9 +82,10 @@ const StudentRegistration = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Department <span className="text-danger">*</span></label>
                 <select {...register('departmentId', { required: true })} className="input bg-white">
-                  <option value="1">CSE</option>
-                  <option value="2">IT</option>
-                  <option value="3">ECE</option>
+                  <option value="">Select Department</option>
+                  {MASTER_DEPARTMENTS.map(dept => (
+                    <option key={dept.id} value={dept.id}>{dept.name} ({dept.abbr})</option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -131,10 +133,21 @@ const StudentRegistration = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number (Optional)</label>
               <input
-                {...register('phone')}
-                className="input"
-                placeholder="+1 234 567 8900"
+                {...register('phone', {
+                  pattern: {
+                    value: /^[0-9]{10}$/,
+                    message: 'Mobile number must be exactly 10 digits'
+                  }
+                })}
+                type="text"
+                maxLength="10"
+                className={`input ${errors.phone ? 'border-danger' : ''}`}
+                placeholder="1234567890"
+                onInput={(e) => {
+                  e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                }}
               />
+              {errors.phone && <p className="text-danger text-xs mt-1">{errors.phone.message}</p>}
             </div>
 
             <button

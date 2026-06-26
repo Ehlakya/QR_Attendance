@@ -117,16 +117,21 @@ const AdminAnalytics = () => {
     );
   }
 
-  const pieData = [
-    { name: 'Present', value: data.overall.presentStudentsToday },
-    { name: 'Absent', value: data.overall.absentStudentsToday }
-  ];
+  const totalAttendance = data.overall.presentStudentsToday + data.overall.absentStudentsToday;
+  const pieData = totalAttendance === 0 
+    ? [{ name: 'No Data', value: 1 }]
+    : [
+        { name: 'Present', value: data.overall.presentStudentsToday },
+        { name: 'Absent', value: data.overall.absentStudentsToday }
+      ];
 
-  const barData = data.departmentWise.map(d => ({
-    name: d.department,
-    Present: d.present,
-    Absent: d.absent
-  }));
+  const barData = data.departmentWise && data.departmentWise.length > 0 
+    ? data.departmentWise.map(d => ({
+        name: d.department,
+        Present: d.present,
+        Absent: d.absent
+      }))
+    : [{ name: 'No Data', Present: 0, Absent: 0 }];
 
   // Mock trend data
   const trendData = [
@@ -188,10 +193,19 @@ const AdminAnalytics = () => {
                     animationDuration={1500}
                     animationEasing="ease-out"
                   >
-                    <Cell fill="#10B981" />
-                    <Cell fill="#EF4444" />
+                    {totalAttendance === 0 ? (
+                      <Cell fill="#64748B" opacity={0.2} />
+                    ) : (
+                      <>
+                        <Cell fill="#10B981" />
+                        <Cell fill="#EF4444" />
+                      </>
+                    )}
                   </Pie>
-                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} 
+                    formatter={(value, name) => totalAttendance === 0 ? ['No data available', ''] : [value, name]}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
