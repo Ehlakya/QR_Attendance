@@ -33,6 +33,14 @@ const Student = sequelize.define('Student', {
     type: DataTypes.ENUM('Pending', 'Approved', 'Rejected'),
     defaultValue: 'Pending',
   },
+  year: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  semester: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   // departmentId and sectionId will be added by association
 }, {
   timestamps: true,

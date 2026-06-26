@@ -5,8 +5,10 @@ import Login from './pages/auth/Login';
 import StudentRegistration from './pages/auth/StudentRegistration';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import DepartmentAnalytics from './pages/admin/DepartmentAnalytics';
+import DepartmentAttendance from './pages/admin/DepartmentAttendance';
 import HODDashboard from './pages/hod/HODDashboard';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
+import TeacherStudents from './pages/teacher/TeacherStudents';
 import SubjectAttendance from './pages/teacher/SubjectAttendance';
 import StudentDashboard from './pages/student/StudentDashboard';
 import QRGenerator from './pages/shared/QRGenerator';
@@ -39,6 +41,7 @@ function App() {
             <Route path="/admin/teachers" element={<TeacherManagement />} />
             <Route path="/admin/details" element={<AdminDetails />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/departments" element={<DepartmentAttendance />} />
             <Route path="/admin/departments/:id" element={<DepartmentAnalytics />} />
             <Route path="/admin/qr" element={<QRGenerator />} />
             <Route path="/analytics/6-month" element={<SixMonthDashboard />} />
@@ -50,6 +53,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['HOD']} />}>
           <Route element={<Layout />}>
             <Route path="/hod" element={<HODDashboard />} />
+            <Route path="/hod/students" element={<TeacherStudents />} />
             <Route path="/hod/qr" element={<QRGenerator />} />
             <Route path="/analytics/6-month" element={<SixMonthDashboard />} />
             <Route path="/teacher/subjects" element={<SubjectSelection />} />
@@ -60,6 +64,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['Class Teacher', 'Subject Teacher', 'HOD', 'admin']} />}>
           <Route element={<Layout />}>
             <Route path="/teacher" element={<TeacherDashboard />} />
+            <Route path="/teacher/students" element={<TeacherStudents />} />
             <Route path="/teacher/qr" element={<QRGenerator />} />
             <Route path="/teacher/attendance/:qrId" element={<SubjectAttendance />} />
             <Route path="/teacher/live-monitor" element={<MonitorLiveAttendance />} />

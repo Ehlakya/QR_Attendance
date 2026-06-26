@@ -46,16 +46,13 @@ const googleLogin = async (req, res, next) => {
           await user.save();
         }
       } else {
-        // Create new Teacher account with Subject Teacher role
-        user = await Teacher.create({
+        // Teacher not found - Return First-Time Setup flag
+        return sendResponse(res, 200, 'First time setup required', {
+          isFirstTimeSetup: true,
+          email,
           name: name || 'Google User',
-          email: email,
-          googleId: googleId,
-          role: 'Subject Teacher',
-          departmentId: 1 // Default assignment for mockup
+          googleId
         });
-        userId = user.id;
-        role = user.role;
       }
     }
 
@@ -148,15 +145,14 @@ const adminLogin = async (req, res, next) => {
 const mockLogin = async (req, res, next) => {
   try {
     const { role } = req.body;
+    const email = req.body.email || 'teacher@college.edu';
+    let teacher = await Teacher.findOne({ where: { email } });
     
-    // Ensure mock teacher exists to prevent foreign key constraint errors
-    let teacher = await Teacher.findOne({ where: { email: 'teacher@college.edu' } });
     if (!teacher) {
-      teacher = await Teacher.create({
-        name: "Google Teacher",
-        email: "teacher@college.edu",
-        role: role || 'Subject Teacher',
-        departmentId: 1
+      return sendResponse(res, 200, 'First time setup required', {
+        isFirstTimeSetup: true,
+        email,
+        name: 'Google Teacher'
       });
     }
 
@@ -213,9 +209,56 @@ const studentLogin = async (req, res, next) => {
   }
 };
 
+const setupTeacher = async (req, res, next) => {
+  try {
+    const { name, email, phone, role, departmentId, subject, googleId } = req.body;
+
+    if (!name || !email || !phone || !role) {
+      throw new ApiError(400, 'Name, email, phone, and role are required');
+    }
+
+    if (phone.length !== 10 || isNaN(phone)) {
+      throw new ApiError(400, 'Mobile number must be exactly 10 digits');
+    }
+
+    let existing = await Teacher.findOne({ where: { email } });
+    if (existing) {
+      throw new ApiError(400, 'Teacher with this email already exists');
+    }
+
+    const teacher = await Teacher.create({
+      name,
+      email,
+      phone,
+      role,
+      departmentId: departmentId || null,
+      subject: subject || null,
+      googleId: googleId || null
+    });
+
+    const io = require('../../config/socket').getIO();
+    io.emit('new_teacher_added', teacher);
+
+    const token = generateToken({ id: teacher.id, role: teacher.role, email: teacher.email });
+
+    return sendResponse(res, 201, 'Profile setup completed successfully', {
+      user: {
+        id: teacher.id,
+        name: teacher.name,
+        email: teacher.email,
+        role: teacher.role,
+      },
+      token
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   googleLogin,
   adminLogin,
   mockLogin,
-  studentLogin
+  studentLogin,
+  setupTeacher
 };

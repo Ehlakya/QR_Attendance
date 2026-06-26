@@ -3,12 +3,12 @@ const sequelize = require('../config/db');
 
 const TeacherSubject = sequelize.define('TeacherSubject', {
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
     primaryKey: true
   },
   teacherId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   subjectName: {
@@ -24,11 +24,11 @@ const TeacherSubject = sequelize.define('TeacherSubject', {
     allowNull: true
   },
   departmentId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: true
   },
   sectionId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: true
   }
 }, {

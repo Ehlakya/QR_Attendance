@@ -7,7 +7,8 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-
+import { MASTER_DEPARTMENTS } from '../../constants/departments';
+import { PREDEFINED_SUBJECTS } from '../../constants/subjects';
 const containerVariants = {
   hidden: { opacity: 0 },
   show: {
@@ -26,6 +27,11 @@ const Login = () => {
   const navigate = useNavigate();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  const [showSetupForm, setShowSetupForm] = useState(false);
+  const [setupData, setSetupData] = useState(null);
+  const [setupLoading, setSetupLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('');
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
@@ -89,20 +95,56 @@ const Login = () => {
     setIsGoogleLoading(true);
     try {
       const response = await axios.post('http://localhost:5000/api/v1/auth/mock-login', {
-        role: 'Subject Teacher'
+        role: 'Subject Teacher',
+        email: 'teacher@college.edu'
       });
 
-      const { user, token } = response.data.data;
-
-      login(user, token);
-      toast.success('Successfully logged in with Google!');
-      handleRouteRedirect(user.role);
-      
+      if (response.data.data && response.data.data.isFirstTimeSetup) {
+        setSetupData(response.data.data);
+        setShowSetupForm(true);
+      } else {
+        const { user, token } = response.data.data;
+        login(user, token);
+        toast.success('Successfully logged in with Google!');
+        handleRouteRedirect(user.role);
+      }
     } catch (error) {
       toast.error('Google Login failed. Please try again.');
       console.error(error);
     } finally {
       setIsGoogleLoading(false);
+    }
+  };
+
+  const handleSetupSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = {
+      name: formData.get('name'),
+      email: setupData.email,
+      phone: formData.get('phone'),
+      role: formData.get('role'),
+      departmentId: formData.get('departmentId') || null,
+      subject: formData.get('subject') || null,
+      googleId: setupData.googleId
+    };
+
+    if (data.phone.length !== 10 || isNaN(data.phone)) {
+      toast.error('Mobile number must be exactly 10 digits');
+      return;
+    }
+
+    setSetupLoading(true);
+    try {
+      const response = await axios.post('http://localhost:5000/api/v1/auth/setup-teacher', data);
+      const { user, token } = response.data.data;
+      login(user, token);
+      toast.success('Profile setup completed successfully!');
+      handleRouteRedirect(user.role);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Setup failed. Please try again.');
+    } finally {
+      setSetupLoading(false);
     }
   };
 
@@ -208,6 +250,110 @@ const Login = () => {
         >
           
           <div className="card">
+            {showSetupForm ? (
+              <div className="animate-fade-in">
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-extrabold text-textPrimary mb-2 tracking-tight">Profile Setup</h2>
+                  <p className="text-textSecondary font-medium">Complete your teacher profile to continue</p>
+                </div>
+                <form onSubmit={handleSetupSubmit} className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-semibold text-textPrimary mb-1.5">Full Name</label>
+                    <input 
+                      type="text" 
+                      name="name" 
+                      defaultValue={setupData?.name || ''} 
+                      required 
+                      className="input bg-background/50 focus:bg-background text-textPrimary border-border" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-textPrimary mb-1.5">Email ID</label>
+                    <input 
+                      type="email" 
+                      value={setupData?.email || ''} 
+                      disabled 
+                      className="input bg-background/10 text-textSecondary border-border opacity-70 cursor-not-allowed" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-textPrimary mb-1.5">Mobile Number</label>
+                    <input 
+                      type="text" 
+                      name="phone" 
+                      required 
+                      maxLength={10}
+                      pattern="\d{10}"
+                      placeholder="10 digit mobile number"
+                      className="input bg-background/50 focus:bg-background text-textPrimary border-border" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-textPrimary mb-1.5">Role</label>
+                    <select 
+                      name="role" 
+                      required 
+                      value={selectedRole}
+                      onChange={(e) => setSelectedRole(e.target.value)}
+                      className="input bg-background/50 focus:bg-background text-textPrimary border-border"
+                    >
+                      <option value="">Select Role</option>
+                      <option value="HOD">HOD</option>
+                      <option value="Class Teacher">Class Teacher</option>
+                      <option value="Subject Teacher">Subject Teacher</option>
+                    </select>
+                  </div>
+                  
+                  {(selectedRole === 'HOD' || selectedRole === 'Class Teacher') && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                      <label className="block text-sm font-semibold text-textPrimary mb-1.5">Department</label>
+                      <select 
+                        name="departmentId" 
+                        required 
+                        className="input bg-background/50 focus:bg-background text-textPrimary border-border"
+                      >
+                        <option value="">Select Department</option>
+                        {MASTER_DEPARTMENTS.map(dept => (
+                          <option key={dept.id} value={dept.id}>{dept.name} ({dept.abbr})</option>
+                        ))}
+                      </select>
+                    </motion.div>
+                  )}
+
+                  {selectedRole === 'Subject Teacher' && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                      <label className="block text-sm font-semibold text-textPrimary mb-1.5">Subject</label>
+                      <select 
+                        name="subject" 
+                        required 
+                        className="input bg-background/50 focus:bg-background text-textPrimary border-border"
+                      >
+                        <option value="">Select Subject</option>
+                        {PREDEFINED_SUBJECTS.map(sub => (
+                          <option key={sub.id} value={sub.name}>{sub.name}</option>
+                        ))}
+                      </select>
+                    </motion.div>
+                  )}
+
+                  <button 
+                    type="submit" 
+                    disabled={setupLoading}
+                    className="w-full btn-primary py-3 flex justify-center items-center gap-2 text-base shadow-lg shadow-primary/30 mt-4 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all text-white"
+                  >
+                    {setupLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Complete Setup & Login'}
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowSetupForm(false)}
+                    className="w-full py-2 text-sm text-textSecondary font-medium hover:text-textPrimary transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <>
             <div className="text-center mb-8">
               <h2 className="text-3xl font-extrabold text-textPrimary mb-2 tracking-tight">Welcome Back</h2>
               <p className="text-textSecondary font-medium">Please sign in to your account</p>
@@ -348,7 +494,8 @@ const Login = () => {
                 Register Here
               </button>
             </motion.div>
-
+            </>
+            )}
           </div>
         </motion.div>
       </div>

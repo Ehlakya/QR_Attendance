@@ -42,18 +42,6 @@ const getTeacherById = async (req, res, next) => {
   }
 };
 
-const updateTeacher = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const teacher = await Teacher.findByPk(id);
-    if (!teacher) throw new ApiError(404, 'Teacher not found');
-    
-    await teacher.update(req.body);
-    return sendResponse(res, 200, 'Teacher updated successfully', teacher);
-  } catch (error) {
-    next(error);
-  }
-};
 
 const deleteTeacher = async (req, res, next) => {
   try {
@@ -130,7 +118,6 @@ module.exports = {
   createTeacher,
   getAllTeachers,
   getTeacherById,
-  updateTeacher,
   deleteTeacher,
   assignSubjects,
   getAssignedSubjects

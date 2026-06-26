@@ -17,6 +17,10 @@ const initModels = () => {
   Department.hasMany(Teacher, { foreignKey: 'departmentId' });
   Teacher.belongsTo(Department, { foreignKey: 'departmentId' });
 
+  // Section hasMany Teachers
+  Section.hasMany(Teacher, { foreignKey: 'sectionId' });
+  Teacher.belongsTo(Section, { foreignKey: 'sectionId' });
+
   // Department hasMany Students
   Department.hasMany(Student, { foreignKey: 'departmentId' });
   Student.belongsTo(Department, { foreignKey: 'departmentId' });

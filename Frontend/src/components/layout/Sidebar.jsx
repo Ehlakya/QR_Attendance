@@ -91,8 +91,8 @@ const Sidebar = () => {
             badge: counts.teachers
           },
           { 
-            name: 'Departments', 
-            path: '/admin/departments/1', 
+            name: 'Department Attendance', 
+            path: '/admin/departments', 
             icon: Building2,
             badge: counts.departments
           },
@@ -117,7 +117,6 @@ const Sidebar = () => {
         return [
           { name: 'Dashboard', path: '/hod', icon: LayoutDashboard },
           { name: 'Dept Attendance', path: '/hod/attendance', icon: ClipboardList },
-          { name: 'Sections', path: '/hod/sections', icon: Layers },
           { name: 'Students', path: '/hod/students', icon: Users },
           { name: 'QR Generator', path: '/hod/qr', icon: QrCode },
           { name: '6-Month Report', path: '/analytics/6-month', icon: Activity },

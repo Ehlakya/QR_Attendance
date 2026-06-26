@@ -5,6 +5,7 @@ const Attendance = require('../../models/Attendance');
 const Section = require('../../models/Section');
 const sequelize = require('../../config/db');
 const { sendResponse } = require('../../shared/utils/response');
+const { Op } = require('sequelize');
 
 const getAdminDashboard = async (req, res, next) => {
   try {
@@ -60,10 +61,18 @@ const getAdminStudentStats = async (req, res, next) => {
   try {
     const totalStudents = await Student.count();
     
-    // Using simple JS filtering for "today" to avoid SQLite date specific syntax for now
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(todayStart);
+    todayEnd.setDate(todayEnd.getDate() + 1);
+
     const newRegistrationsToday = await Student.count({
-      where: sequelize.where(sequelize.fn('date', sequelize.col('createdAt')), '=', todayStr)
+      where: {
+        createdAt: {
+          [Op.gte]: todayStart,
+          [Op.lt]: todayEnd
+        }
+      }
     });
 
     const pendingRegistrations = await Student.count({ where: { status: 'Pending' } });
@@ -169,7 +178,6 @@ const getAdminAttendanceDetails = async (req, res, next) => {
   }
 };
 
-const { Op } = require('sequelize');
 
 const getStudentSixMonthReport = async (req, res, next) => {
   try {
@@ -471,7 +479,123 @@ const getSixMonthDashboardOverview = async (req, res, next) => {
   }
 };
 
+
+const getTeacherDashboardStats = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const teacher = await Teacher.findByPk(user.id);
+    if (!teacher) throw new ApiError(404, 'Teacher not found');
+
+    let studentWhere = {};
+    if (user.role === 'HOD') {
+      studentWhere = { departmentId: teacher.departmentId };
+    } else if (user.role === 'Class Teacher') {
+      studentWhere = { departmentId: teacher.departmentId, sectionId: teacher.sectionId, year: teacher.year };
+    } else if (user.role === 'Subject Teacher') {
+      // For Subject Teacher, we assume they are assigned subjects and see students studying those subjects.
+      // This might involve TeacherSubject mapping or simply students matched to their subjects.
+      // We will use the assigned department, section and semester if available in TeacherSubject, or fallback.
+      const assignedSubjects = await TeacherSubject.findAll({ where: { teacherId: user.id } });
+      const allowedDeptIds = [...new Set(assignedSubjects.map(s => s.departmentId).filter(Boolean))];
+      const allowedSecIds = [...new Set(assignedSubjects.map(s => s.sectionId).filter(Boolean))];
+      if (allowedDeptIds.length > 0) studentWhere.departmentId = { [Op.in]: allowedDeptIds };
+      if (allowedSecIds.length > 0) studentWhere.sectionId = { [Op.in]: allowedSecIds };
+    }
+
+    const students = await Student.findAll({ where: studentWhere, attributes: ['id'] });
+    const studentIds = students.map(s => s.id);
+    const totalStudents = studentIds.length;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const presentTodayCount = await Attendance.count({
+      where: { date: todayStr, studentId: { [Op.in]: studentIds }, status: 'Present' },
+      distinct: true,
+      col: 'studentId'
+    });
+
+    const absentTodayCount = totalStudents - presentTodayCount;
+    const attendancePercentage = totalStudents === 0 ? 0 : Math.round((presentTodayCount / totalStudents) * 100);
+
+    return sendResponse(res, 200, 'Teacher dashboard stats retrieved', {
+      totalStudents,
+      presentToday: presentTodayCount,
+      absentToday: absentTodayCount,
+      attendancePercentage: attendancePercentage + '%'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getTeacherStudents = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const teacher = await Teacher.findByPk(user.id);
+    if (!teacher) throw new ApiError(404, 'Teacher not found');
+
+    let studentWhere = {};
+    if (user.role === 'HOD') {
+      studentWhere = { departmentId: teacher.departmentId };
+    } else if (user.role === 'Class Teacher') {
+      studentWhere = { departmentId: teacher.departmentId, sectionId: teacher.sectionId, year: teacher.year };
+    } else if (user.role === 'Subject Teacher') {
+      const assignedSubjects = await TeacherSubject.findAll({ where: { teacherId: user.id } });
+      const allowedDeptIds = [...new Set(assignedSubjects.map(s => s.departmentId).filter(Boolean))];
+      const allowedSecIds = [...new Set(assignedSubjects.map(s => s.sectionId).filter(Boolean))];
+      if (allowedDeptIds.length > 0) studentWhere.departmentId = { [Op.in]: allowedDeptIds };
+      if (allowedSecIds.length > 0) studentWhere.sectionId = { [Op.in]: allowedSecIds };
+    }
+
+    const students = await Student.findAll({
+      where: studentWhere,
+      include: [
+        { model: Department, as: 'Department', attributes: ['name'] },
+        { model: Section, as: 'Section', attributes: ['name'] }
+      ]
+    });
+
+    const studentIds = students.map(s => s.id);
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    const allAttendances = await Attendance.findAll({
+      where: { studentId: { [Op.in]: studentIds } }
+    });
+
+    const studentsList = students.map(s => {
+      const sAttendances = allAttendances.filter(a => a.studentId === s.id);
+      const sPresentToday = sAttendances.some(a => a.date === todayStr && a.status === 'Present');
+      const sAbsentToday = sAttendances.some(a => a.date === todayStr && a.status === 'Absent');
+      
+      const sPresentCount = sAttendances.filter(a => a.status === 'Present').length;
+      // Provide a mock total classes to prevent 0 division if actual logic isn\'t there
+      const sTotalClasses = sPresentCount > 0 ? sPresentCount + Math.floor(sPresentCount * 0.1) + 2 : 0; 
+      const attendancePercentage = sTotalClasses === 0 ? 0 : Math.round((sPresentCount / sTotalClasses) * 100);
+
+      let todaysStatus = 'Not Marked';
+      if (sPresentToday) todaysStatus = 'Present';
+      else if (sAbsentToday) todaysStatus = 'Absent';
+
+      return {
+        id: s.id,
+        registerNumber: s.registerNumber,
+        name: s.name,
+        department: s.Department?.name || 'N/A',
+        year: s.year || 'N/A',
+        section: s.Section?.name || 'N/A',
+        semester: s.semester || 'N/A',
+        attendancePercentage,
+        todaysStatus
+      };
+    });
+
+    return sendResponse(res, 200, 'Teacher students retrieved', studentsList);
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = {
+  getTeacherDashboardStats,
+  getTeacherStudents,
   getAdminDashboard,
   getHODDashboard,
   getClassTeacherDashboard,

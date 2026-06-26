@@ -13,6 +13,8 @@ router.get('/admin/attendance-details', roleMiddleware('admin', 'ADMIN'), dashbo
 
 router.get('/hod', roleMiddleware('HOD'), dashboardController.getHODDashboard);
 router.get('/class-teacher', roleMiddleware('Class Teacher'), dashboardController.getClassTeacherDashboard);
+router.get('/teacher/stats', roleMiddleware('HOD', 'Class Teacher', 'Subject Teacher'), dashboardController.getTeacherDashboardStats);
+router.get('/teacher/students', roleMiddleware('HOD', 'Class Teacher', 'Subject Teacher'), dashboardController.getTeacherStudents);
 router.get('/6-month-report/:studentId', roleMiddleware('admin', 'ADMIN', 'HOD', 'Class Teacher', 'Subject Teacher'), dashboardController.getStudentSixMonthReport);
 router.get('/6-month-overview', roleMiddleware('admin', 'ADMIN', 'HOD', 'Class Teacher', 'Subject Teacher'), dashboardController.getSixMonthDashboardOverview);
 
