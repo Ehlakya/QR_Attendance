@@ -61,6 +61,26 @@ const generateQR = async (req, res, next) => {
       });
     }
 
+    // Notify Students
+    const { createAndEmitNotification } = require('../notification/notification.service');
+    const studentsToNotify = await Student.findAll({
+      where: {
+        departmentId: { [Op.in]: departmentIds },
+        sectionId: sectionId
+      }
+    });
+
+    for (const student of studentsToNotify) {
+      await createAndEmitNotification({
+        userId: student.id,
+        userRole: 'Student',
+        type: 'Info',
+        title: '📱 New Attendance QR Available',
+        message: `Subject: ${subjectName || type}\nTeacher: ${req.user.name || 'Your Teacher'}\nValid Until: ${new Date(Date.now() + (expiryMinutes || 10) * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}\nTap to open QR Scanner.`,
+        relatedId: qrRecords[0].id
+      });
+    }
+
     return sendResponse(res, 201, 'QR Code generated successfully', {
       qrId: qrRecords[0].id,
       qrCodeImage,

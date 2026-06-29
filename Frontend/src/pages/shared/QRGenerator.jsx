@@ -21,7 +21,7 @@ const QRGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDepartments, setSelectedDepartments] = useState([]);
-  const { token } = useAuth();
+  const { user, token } = useAuth();
 
   const watchType = watch('type');
 
@@ -103,7 +103,9 @@ const QRGenerator = () => {
                 <div>
                   <label className="block text-sm font-semibold text-textPrimary mb-1">Class Type</label>
                   <select {...register('type')} className="input bg-background/50 focus:bg-background text-textPrimary border-border transition-colors">
-                    <option value="Morning Attendance">Morning Attendance</option>
+                    {user?.role !== 'Subject Teacher' && (
+                      <option value="Morning Attendance">Morning Attendance</option>
+                    )}
                     <option value="Subject Attendance">Subject Attendance</option>
                   </select>
                 </div>
@@ -168,12 +170,30 @@ const QRGenerator = () => {
                     >
                       <div>
                         <label className="block text-sm font-semibold text-textPrimary mb-1 mt-2">Subject Name <span className="text-danger">*</span></label>
-                        <input 
-                          type="text" 
-                          {...register('subjectName', { required: watchType === 'Subject Attendance' })} 
-                          className="input bg-background/50 focus:bg-background text-textPrimary border-border transition-colors"
-                          placeholder="e.g. Data Structures"
-                        />
+                        {user?.role === 'Subject Teacher' ? (
+                          !user?.subject ? (
+                            <div className="text-sm font-semibold text-danger mt-2 bg-danger/10 p-3 rounded-lg border border-danger/20">
+                              No subjects have been assigned to your account. Please contact the administrator.
+                            </div>
+                          ) : (
+                            <select 
+                              {...register('subjectName', { required: watchType === 'Subject Attendance' })} 
+                              className="input bg-background/50 focus:bg-background text-textPrimary border-border transition-colors"
+                            >
+                              <option value="">Select a Subject</option>
+                              {user.subject.split(',').filter(Boolean).map(sub => (
+                                <option key={sub.trim()} value={sub.trim()}>{sub.trim()}</option>
+                              ))}
+                            </select>
+                          )
+                        ) : (
+                          <input 
+                            type="text" 
+                            {...register('subjectName', { required: watchType === 'Subject Attendance' })} 
+                            className="input bg-background/50 focus:bg-background text-textPrimary border-border transition-colors"
+                            placeholder="e.g. Data Structures"
+                          />
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-textPrimary mb-1 mt-2">Class Time <span className="text-danger">*</span></label>

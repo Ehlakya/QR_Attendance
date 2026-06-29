@@ -10,7 +10,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-const SixMonthDashboard = () => {
+const TeacherSixMonthReport = () => {
   const { token, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [students, setStudents] = useState([]);
@@ -241,6 +241,21 @@ const SixMonthDashboard = () => {
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
               </select>
+              <div className="flex gap-2 col-span-2 md:col-span-3 lg:col-span-6 justify-end mt-2">
+                <button type="button" onClick={fetchDefaultOverview} className="btn-primary text-sm px-4 py-2 flex items-center gap-2">
+                  <Search className="w-4 h-4" /> Filter
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setFilters({ departmentId: '', semester: '', sectionId: '', subjectName: '', month: '', year: '' });
+                    // Will auto-fetch due to useEffect on filters change
+                  }} 
+                  className="btn-secondary text-sm px-4 py-2 text-danger hover:bg-danger/10"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
           )}
 
@@ -697,4 +712,4 @@ const SixMonthDashboard = () => {
   );
 };
 
-export default SixMonthDashboard;
+export default TeacherSixMonthReport;

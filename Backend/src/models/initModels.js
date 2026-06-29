@@ -46,9 +46,7 @@ const initModels = () => {
   QR.hasMany(Attendance, { foreignKey: 'qrId' });
   Attendance.belongsTo(QR, { foreignKey: 'qrId' });
 
-  // Notification Associations
-  Teacher.hasMany(Notification, { foreignKey: 'teacherId' });
-  Notification.belongsTo(Teacher, { foreignKey: 'teacherId' });
+  // Notification Associations (Polymorphic now handled via userId and userRole)
 
   // TeacherSubject Associations
   Teacher.hasMany(TeacherSubject, { foreignKey: 'teacherId' });

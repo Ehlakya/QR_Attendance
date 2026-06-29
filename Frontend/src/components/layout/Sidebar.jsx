@@ -119,7 +119,7 @@ const Sidebar = () => {
           { name: 'Department Attendance', path: '/teacher/department-attendance', icon: ClipboardList },
           { name: 'Students', path: '/hod/students', icon: Users },
           { name: 'QR Generator', path: '/hod/qr', icon: QrCode },
-          { name: '6-Month Report', path: '/analytics/6-month', icon: Activity },
+          { name: '6-Month Report', path: '/teacher/6-month-report', icon: Activity },
           { name: 'Manage Subjects', path: '/teacher/subjects', icon: BookOpen },
         ];
       case 'Class Teacher':
@@ -129,14 +129,13 @@ const Sidebar = () => {
           { name: 'Students', path: '/teacher/students', icon: Users },
           { name: 'Morning QR', path: '/teacher/qr', icon: QrCode },
           { name: 'Live Monitor', path: '/teacher/live-monitor', icon: Activity },
-          { name: '6-Month Report', path: '/analytics/6-month', icon: Activity },
+          { name: '6-Month Report', path: '/teacher/6-month-report', icon: Activity },
         ];
       case 'Subject Teacher':
         return [
           { name: 'Dashboard', path: '/teacher', icon: LayoutDashboard },
           { name: 'QR Generator', path: '/teacher/qr', icon: QrCode },
           { name: 'Live Monitor', path: '/teacher/live-monitor', icon: Activity },
-          { name: '6-Month Report', path: '/analytics/6-month', icon: Activity },
         ];
       case 'Student':
         return [
@@ -234,12 +233,6 @@ const Sidebar = () => {
               <p className="text-xs font-medium text-textSecondary truncate">{user?.role || 'Role'}</p>
             </div>
           </div>
-          <button 
-            className="text-xs text-danger font-bold hover:underline"
-            onClick={() => {/* logout handler typically from useAuth */}}
-          >
-            Logout
-          </button>
         </div>
       </div>
     </aside>

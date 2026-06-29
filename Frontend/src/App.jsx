@@ -22,6 +22,8 @@ import AdminAnalytics from './pages/admin/AdminAnalytics';
 import MonitorLiveAttendance from './pages/teacher/MonitorLiveAttendance';
 import SubjectSelection from './pages/teacher/SubjectSelection';
 import SixMonthDashboard from './pages/shared/SixMonthDashboard';
+import TeacherSixMonthReport from './pages/teacher/TeacherSixMonthReport';
+import TeacherSetup from './pages/auth/TeacherSetup';
 
 // Dummy components for now
 const Dashboard = ({ role }) => <div className="p-8 text-xl">{role} Dashboard</div>;
@@ -33,6 +35,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<StudentRegistration />} />
+        <Route path="/teacher-setup" element={<TeacherSetup />} />
         
         {/* Admin Routes */}
         <Route element={<ProtectedRoute allowedRoles={['admin', 'ADMIN']} />}>
@@ -56,7 +59,6 @@ function App() {
             <Route path="/hod" element={<HODDashboard />} />
             <Route path="/hod/students" element={<TeacherStudents />} />
             <Route path="/hod/qr" element={<QRGenerator />} />
-            <Route path="/analytics/6-month" element={<SixMonthDashboard />} />
             <Route path="/teacher/subjects" element={<SubjectSelection />} />
           </Route>
         </Route>
@@ -65,6 +67,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['Class Teacher', 'HOD']} />}>
           <Route element={<Layout />}>
             <Route path="/teacher/department-attendance" element={<DepartmentAttendanceTeacher />} />
+            <Route path="/teacher/6-month-report" element={<TeacherSixMonthReport />} />
           </Route>
         </Route>
 
@@ -76,7 +79,6 @@ function App() {
             <Route path="/teacher/attendance/:qrId" element={<SubjectAttendance />} />
             <Route path="/teacher/live-monitor" element={<MonitorLiveAttendance />} />
             <Route path="/teacher/subjects" element={<SubjectSelection />} />
-            <Route path="/analytics/6-month" element={<SixMonthDashboard />} />
           </Route>
         </Route>
 

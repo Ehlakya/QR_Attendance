@@ -7,19 +7,34 @@ const Notification = sequelize.define('Notification', {
     primaryKey: true,
     autoIncrement: true,
   },
-  message: {
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  userRole: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   type: {
-    type: DataTypes.ENUM('Alert', 'Info', 'Warning'),
+    type: DataTypes.STRING,
     defaultValue: 'Info',
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  message: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  relatedId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   },
   isRead: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   }
-  // teacherId will be added by association
 }, {
   timestamps: true,
   tableName: 'notifications'

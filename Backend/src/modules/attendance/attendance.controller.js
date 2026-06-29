@@ -1,6 +1,8 @@
 const Attendance = require('../../models/Attendance');
 const QR = require('../../models/QR');
 const Student = require('../../models/Student');
+const Department = require('../../models/Department');
+const Section = require('../../models/Section');
 const { sendResponse } = require('../../shared/utils/response');
 const { ApiError } = require('../../shared/middlewares/error.middleware');
 const { Op } = require('sequelize');
@@ -38,7 +40,12 @@ const markAttendance = async (req, res, next) => {
       throw new ApiError(400, 'QR Code has expired');
     }
 
-    const student = await Student.findByPk(studentId);
+    const student = await Student.findByPk(studentId, {
+      include: [
+        { model: Department, attributes: ['name'] },
+        { model: Section, attributes: ['name'] }
+      ]
+    });
     if (!student) throw new ApiError(404, 'Student not found');
 
     // Strict Target Validation
@@ -73,6 +80,34 @@ const markAttendance = async (req, res, next) => {
       studentId, 
       qrId: qr.id 
     });
+
+    // Notify ONLY the Teacher who generated the QR code
+    if (student && qr.teacherId) {
+      const { createAndEmitNotification } = require('../notification/notification.service');
+      const Teacher = require('../../models/Teacher');
+      
+      const teacher = await Teacher.findByPk(qr.teacherId);
+      if (teacher) {
+        const departmentName = student.Department ? student.Department.name : 'Unknown Department';
+        const sectionName = student.Section ? student.Section.name : 'Unknown Section';
+        
+        // Year/Semester logic: fetch from student model directly
+        const year = student.year || 'Unknown';
+        const semester = student.semester || 'Unknown';
+        const subjectName = qr.subjectName || qr.type;
+
+        const message = `Student: ${student.name}\nRegister No: ${student.registerNumber}\nDepartment: ${departmentName}\nYear: ${year}\nSemester: ${semester}\nSection: ${sectionName}\nSubject: ${subjectName}\nTime: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}\nDate: ${new Date().toLocaleDateString('en-GB')}\nStatus: Present\nQR Session ID: ${qr.id}`;
+        
+        await createAndEmitNotification({
+          userId: qr.teacherId,
+          userRole: teacher.role || 'Teacher', // We send to the specific teacher's role dynamically
+          type: 'Info',
+          title: '✅ Attendance Marked',
+          message: message,
+          relatedId: student.id
+        });
+      }
+    }
 
     return sendResponse(res, 201, 'Attendance marked successfully', attendance);
   } catch (error) {

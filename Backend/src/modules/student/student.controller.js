@@ -40,6 +40,21 @@ const createStudent = async (req, res, next) => {
       sectionId: student.sectionId 
     });
 
+    // Notify Admins
+    const { createAndEmitNotification } = require('../notification/notification.service');
+    const Admin = require('../../models/Admin');
+    const admins = await Admin.findAll();
+    for (const admin of admins) {
+      await createAndEmitNotification({
+        userId: admin.id,
+        userRole: 'ADMIN',
+        type: 'Info',
+        title: 'New Student Registered',
+        message: `${name} (${registerNumber}) has registered.`,
+        relatedId: student.id
+      });
+    }
+
     const { generateToken } = require('../../shared/utils/jwt');
     const token = generateToken({ id: student.id, role: 'Student', email: student.email });
 

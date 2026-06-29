@@ -40,7 +40,7 @@ const createNotification = async (req, res, next) => {
 const getMyNotifications = async (req, res, next) => {
   try {
     const notifications = await Notification.findAll({
-      where: { teacherId: req.user.id },
+      where: { userId: req.user.id, userRole: req.user.role },
       order: [['createdAt', 'DESC']]
     });
     return sendResponse(res, 200, 'Notifications retrieved', notifications);
@@ -52,8 +52,17 @@ const getMyNotifications = async (req, res, next) => {
 const markAsRead = async (req, res, next) => {
   try {
     const { id } = req.params;
-    await Notification.update({ isRead: true }, { where: { id, teacherId: req.user.id } });
+    await Notification.update({ isRead: true }, { where: { id, userId: req.user.id, userRole: req.user.role } });
     return sendResponse(res, 200, 'Notification marked as read');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const markAllAsRead = async (req, res, next) => {
+  try {
+    await Notification.update({ isRead: true }, { where: { userId: req.user.id, userRole: req.user.role, isRead: false } });
+    return sendResponse(res, 200, 'All notifications marked as read');
   } catch (error) {
     next(error);
   }
@@ -62,5 +71,6 @@ const markAsRead = async (req, res, next) => {
 module.exports = {
   createNotification,
   getMyNotifications,
-  markAsRead
+  markAsRead,
+  markAllAsRead
 };

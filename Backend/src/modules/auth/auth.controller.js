@@ -65,6 +65,10 @@ const googleLogin = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role,
+        subject: user.subject || null,
+        departmentId: user.departmentId || null,
+        sectionId: user.sectionId || null,
+        year: user.year || null,
       },
       token
     });
@@ -133,7 +137,11 @@ const adminLogin = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: role,
-        status: user.status // For students
+        subject: user.subject || null,
+        departmentId: user.departmentId || null,
+        sectionId: user.sectionId || null,
+        year: user.year || null,
+        status: user.status
       },
       token
     });
@@ -164,6 +172,10 @@ const mockLogin = async (req, res, next) => {
         name: teacher.name,
         email: teacher.email,
         role: teacher.role,
+        subject: teacher.subject || null,
+        departmentId: teacher.departmentId || null,
+        sectionId: teacher.sectionId || null,
+        year: teacher.year || null,
       },
       token
     });
@@ -211,7 +223,7 @@ const studentLogin = async (req, res, next) => {
 
 const setupTeacher = async (req, res, next) => {
   try {
-    const { name, email, phone, role, departmentId, subject, googleId } = req.body;
+    const { name, email, phone, role, departmentId, subject, year, sectionId, googleId } = req.body;
 
     if (!name || !email || !phone || !role) {
       throw new ApiError(400, 'Name, email, phone, and role are required');
@@ -233,11 +245,28 @@ const setupTeacher = async (req, res, next) => {
       role,
       departmentId: departmentId || null,
       subject: subject || null,
+      year: year || null,
+      sectionId: sectionId || null,
       googleId: googleId || null
     });
 
     const io = require('../../config/socket').getIO();
     io.emit('new_teacher_added', teacher);
+
+    // Notify Admins
+    const { createAndEmitNotification } = require('../notification/notification.service');
+    const Admin = require('../../models/Admin');
+    const admins = await Admin.findAll();
+    for (const admin of admins) {
+      await createAndEmitNotification({
+        userId: admin.id,
+        userRole: 'ADMIN',
+        type: 'Info',
+        title: `New ${role} Registered`,
+        message: `${name} has completed teacher registration.`,
+        relatedId: teacher.id
+      });
+    }
 
     const token = generateToken({ id: teacher.id, role: teacher.role, email: teacher.email });
 
@@ -247,6 +276,10 @@ const setupTeacher = async (req, res, next) => {
         name: teacher.name,
         email: teacher.email,
         role: teacher.role,
+        subject: teacher.subject || null,
+        departmentId: teacher.departmentId || null,
+        sectionId: teacher.sectionId || null,
+        year: teacher.year || null,
       },
       token
     });

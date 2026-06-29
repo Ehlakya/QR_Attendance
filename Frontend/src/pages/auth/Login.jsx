@@ -27,17 +27,14 @@ const Login = () => {
   const navigate = useNavigate();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
-  const [showSetupForm, setShowSetupForm] = useState(false);
-  const [setupData, setSetupData] = useState(null);
-  const [setupLoading, setSetupLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('');
+
+  const rememberedEmail = localStorage.getItem('rememberedEmail') || '';
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
-      username: 'admin@gmail.com',
-      password: 'admin@123',
-      rememberMe: false
+      username: rememberedEmail,
+      password: '',
+      rememberMe: !!rememberedEmail
     }
   });
 
@@ -82,6 +79,12 @@ const Login = () => {
         return;
       }
 
+      if (data.rememberMe) {
+        localStorage.setItem('rememberedEmail', cleanUsername);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
+
       login(user, token);
       toast.success('Welcome Back!');
       handleRouteRedirect(user.role);
@@ -92,16 +95,23 @@ const Login = () => {
   };
 
   const handleGoogleSuccess = async () => {
+    // Mock prompt to allow testing different teacher emails
+    const mockEmail = window.prompt(
+      "MOCK GOOGLE LOGIN\n\nEnter an email to test the flow:\n- Enter a new email to test Registration.\n- Enter an existing email to test Login.", 
+      "teacher@college.edu"
+    );
+
+    if (!mockEmail) return;
+
     setIsGoogleLoading(true);
     try {
       const response = await axios.post('http://localhost:5000/api/v1/auth/mock-login', {
-        role: 'Subject Teacher',
-        email: 'teacher@college.edu'
+        email: mockEmail,
+        role: 'Teacher' // Role is determined by the DB in mock-login anyway
       });
 
       if (response.data.data && response.data.data.isFirstTimeSetup) {
-        setSetupData(response.data.data);
-        setShowSetupForm(true);
+        navigate('/teacher-setup', { state: { setupData: response.data.data } });
       } else {
         const { user, token } = response.data.data;
         login(user, token);
@@ -113,38 +123,6 @@ const Login = () => {
       console.error(error);
     } finally {
       setIsGoogleLoading(false);
-    }
-  };
-
-  const handleSetupSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = {
-      name: formData.get('name'),
-      email: setupData.email,
-      phone: formData.get('phone'),
-      role: formData.get('role'),
-      departmentId: formData.get('departmentId') || null,
-      subject: formData.get('subject') || null,
-      googleId: setupData.googleId
-    };
-
-    if (data.phone.length !== 10 || isNaN(data.phone)) {
-      toast.error('Mobile number must be exactly 10 digits');
-      return;
-    }
-
-    setSetupLoading(true);
-    try {
-      const response = await axios.post('http://localhost:5000/api/v1/auth/setup-teacher', data);
-      const { user, token } = response.data.data;
-      login(user, token);
-      toast.success('Profile setup completed successfully!');
-      handleRouteRedirect(user.role);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Setup failed. Please try again.');
-    } finally {
-      setSetupLoading(false);
     }
   };
 
@@ -250,110 +228,6 @@ const Login = () => {
         >
           
           <div className="card">
-            {showSetupForm ? (
-              <div className="animate-fade-in">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-extrabold text-textPrimary mb-2 tracking-tight">Profile Setup</h2>
-                  <p className="text-textSecondary font-medium">Complete your teacher profile to continue</p>
-                </div>
-                <form onSubmit={handleSetupSubmit} className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-semibold text-textPrimary mb-1.5">Full Name</label>
-                    <input 
-                      type="text" 
-                      name="name" 
-                      defaultValue={setupData?.name || ''} 
-                      required 
-                      className="input bg-background/50 focus:bg-background text-textPrimary border-border" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-textPrimary mb-1.5">Email ID</label>
-                    <input 
-                      type="email" 
-                      value={setupData?.email || ''} 
-                      disabled 
-                      className="input bg-background/10 text-textSecondary border-border opacity-70 cursor-not-allowed" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-textPrimary mb-1.5">Mobile Number</label>
-                    <input 
-                      type="text" 
-                      name="phone" 
-                      required 
-                      maxLength={10}
-                      pattern="\d{10}"
-                      placeholder="10 digit mobile number"
-                      className="input bg-background/50 focus:bg-background text-textPrimary border-border" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-textPrimary mb-1.5">Role</label>
-                    <select 
-                      name="role" 
-                      required 
-                      value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value)}
-                      className="input bg-background/50 focus:bg-background text-textPrimary border-border"
-                    >
-                      <option value="">Select Role</option>
-                      <option value="HOD">HOD</option>
-                      <option value="Class Teacher">Class Teacher</option>
-                      <option value="Subject Teacher">Subject Teacher</option>
-                    </select>
-                  </div>
-                  
-                  {(selectedRole === 'HOD' || selectedRole === 'Class Teacher') && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                      <label className="block text-sm font-semibold text-textPrimary mb-1.5">Department</label>
-                      <select 
-                        name="departmentId" 
-                        required 
-                        className="input bg-background/50 focus:bg-background text-textPrimary border-border"
-                      >
-                        <option value="">Select Department</option>
-                        {MASTER_DEPARTMENTS.map(dept => (
-                          <option key={dept.id} value={dept.id}>{dept.name} ({dept.abbr})</option>
-                        ))}
-                      </select>
-                    </motion.div>
-                  )}
-
-                  {selectedRole === 'Subject Teacher' && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                      <label className="block text-sm font-semibold text-textPrimary mb-1.5">Subject</label>
-                      <select 
-                        name="subject" 
-                        required 
-                        className="input bg-background/50 focus:bg-background text-textPrimary border-border"
-                      >
-                        <option value="">Select Subject</option>
-                        {PREDEFINED_SUBJECTS.map(sub => (
-                          <option key={sub.id} value={sub.name}>{sub.name}</option>
-                        ))}
-                      </select>
-                    </motion.div>
-                  )}
-
-                  <button 
-                    type="submit" 
-                    disabled={setupLoading}
-                    className="w-full btn-primary py-3 flex justify-center items-center gap-2 text-base shadow-lg shadow-primary/30 mt-4 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all text-white"
-                  >
-                    {setupLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Complete Setup & Login'}
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setShowSetupForm(false)}
-                    className="w-full py-2 text-sm text-textSecondary font-medium hover:text-textPrimary transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <>
             <div className="text-center mb-8">
               <h2 className="text-3xl font-extrabold text-textPrimary mb-2 tracking-tight">Welcome Back</h2>
               <p className="text-textSecondary font-medium">Please sign in to your account</p>
@@ -373,7 +247,7 @@ const Login = () => {
                   type="text" 
                   {...register('username', { required: 'Email or Register Number is required' })}
                   className={`input bg-background/50 focus:bg-background text-textPrimary border-border ${errors.username ? 'border-danger focus:ring-danger/20 focus:border-danger' : ''}`}
-                  placeholder="admin@gmail.com or CS2026001"
+                  placeholder="Enter Your Mail ID"
                 />
                 {errors.username && <p className="text-danger text-xs mt-1.5">{errors.username.message}</p>}
               </motion.div>
@@ -466,7 +340,7 @@ const Login = () => {
               ) : (
                 <button
                   type="button"
-                  onClick={() => handleGoogleSuccess()}
+                  onClick={handleGoogleSuccess}
                   className="w-full flex items-center justify-center gap-3 bg-card border border-border text-textPrimary font-semibold py-2.5 px-4 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/20 transition-all shadow-sm hover:shadow-md"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -475,7 +349,7 @@ const Login = () => {
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                   </svg>
-                  Google
+                  Continue with Google
                 </button>
               )}
             </motion.div>
@@ -494,8 +368,6 @@ const Login = () => {
                 Register Here
               </button>
             </motion.div>
-            </>
-            )}
           </div>
         </motion.div>
       </div>

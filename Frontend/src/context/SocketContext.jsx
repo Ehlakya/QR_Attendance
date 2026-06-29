@@ -10,15 +10,19 @@ export const useSocket = () => {
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   useEffect(() => {
     // Only connect when user is authenticated
-    if (token) {
+    if (token && user) {
       const newSocket = io('http://localhost:5000', {
         auth: {
           token
         }
+      });
+
+      newSocket.on('connect', () => {
+        newSocket.emit('join_room', `${user.role}_${user.id}`);
       });
 
       setSocket(newSocket);

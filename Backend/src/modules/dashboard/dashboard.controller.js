@@ -293,7 +293,9 @@ const getStudentSixMonthReport = async (req, res, next) => {
         name: student.name,
         registerNumber: student.registerNumber,
         department: student.Department?.name || 'N/A',
-        section: student.Section?.name || 'N/A'
+        section: student.Section?.name || 'N/A',
+        year: student.year || 'N/A',
+        semester: student.semester || 'N/A'
       },
       overallPercentage,
       totalPresent,
@@ -381,13 +383,20 @@ const getSixMonthDashboardOverview = async (req, res, next) => {
     let globalPresent = 0;
     let globalClasses = 0;
     
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date();
-      d.setMonth(d.getMonth() - i);
-      const monthStr = d.toLocaleString('default', { month: 'short' });
-      const label = `${monthStr}`;
-      
-      const monthPrefix = d.toISOString().substring(0, 7);
+    const targetMonths = [
+      { name: 'January', idx: 0 },
+      { name: 'February', idx: 1 },
+      { name: 'March', idx: 2 },
+      { name: 'April', idx: 3 },
+      { name: 'May', idx: 4 },
+      { name: 'June', idx: 5 }
+    ];
+
+    const currentYear = new Date().getFullYear();
+
+    for (const m of targetMonths) {
+      const label = m.name;
+      const monthPrefix = `${currentYear}-${String(m.idx + 1).padStart(2, '0')}`;
       const presentThisMonth = attendances.filter(a => a.date.startsWith(monthPrefix)).length;
       
       const mockTotalClassesThisMonth = presentThisMonth > 0 ? presentThisMonth + Math.floor(presentThisMonth * 0.15) + (totalStudents * 2) : 0;
@@ -423,7 +432,10 @@ const getSixMonthDashboardOverview = async (req, res, next) => {
       });
     });
 
-    const tableData = students.slice(0, 50).map(s => {
+    let above75Count = 0;
+    let below75Count = 0;
+
+    const tableData = students.map(s => {
       const sAttendances = attendances.filter(a => a.studentId === s.id);
       const sPresent = sAttendances.length;
       const sClasses = sPresent > 0 ? sPresent + Math.floor(sPresent * 0.15) + 2 : 0;
@@ -442,6 +454,12 @@ const getSixMonthDashboardOverview = async (req, res, next) => {
         }
       });
 
+      if (mockOverall >= 75) {
+        above75Count++;
+      } else {
+        below75Count++;
+      }
+
       let status = 'Good';
       if (mockOverall < 75) status = 'Low';
       else if (mockOverall < 85) status = 'Warning';
@@ -450,7 +468,10 @@ const getSixMonthDashboardOverview = async (req, res, next) => {
         id: s.id,
         name: s.name,
         registerNumber: s.registerNumber,
-        className: `${s.Department?.name || 'Dept'} - ${s.Section?.name || 'Sec'}`,
+        department: s.Department?.name || 'N/A',
+        year: s.year || 'N/A',
+        semester: s.semester || 'N/A',
+        section: s.Section?.name || 'N/A',
         monthWise,
         overall: mockOverall,
         status
@@ -460,9 +481,9 @@ const getSixMonthDashboardOverview = async (req, res, next) => {
     return sendResponse(res, 200, 'Dashboard overview retrieved', {
       overview: {
         totalStudents,
-        presentTodayPercent,
-        absentTodayPercent,
-        avgMonthlyAttendance
+        avgMonthlyAttendance,
+        above75Count,
+        below75Count
       },
       charts: {
         monthlyTrend: monthlyData,

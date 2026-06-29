@@ -4,11 +4,11 @@ const sectionController = require('./section.controller');
 const authMiddleware = require('../../shared/middlewares/auth.middleware');
 const roleMiddleware = require('../../shared/middlewares/role.middleware');
 
-router.use(authMiddleware);
-
-router.post('/', roleMiddleware('admin', 'HOD'), sectionController.createSection);
+// Make GET public for Registration forms
 router.get('/', sectionController.getAllSections);
-router.put('/:id', roleMiddleware('admin', 'HOD'), sectionController.updateSection);
-router.delete('/:id', roleMiddleware('admin', 'HOD'), sectionController.deleteSection);
+
+router.post('/', authMiddleware, roleMiddleware('admin', 'HOD'), sectionController.createSection);
+router.put('/:id', authMiddleware, roleMiddleware('admin', 'HOD'), sectionController.updateSection);
+router.delete('/:id', authMiddleware, roleMiddleware('admin', 'HOD'), sectionController.deleteSection);
 
 module.exports = router;
