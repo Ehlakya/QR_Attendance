@@ -15,7 +15,7 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     // Only connect when user is authenticated
     if (token && user) {
-      const newSocket = io('http://localhost:5000', {
+      const newSocket = io('https://qr-attendance-y9x7.onrender.com', {
         auth: {
           token
         }

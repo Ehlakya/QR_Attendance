@@ -25,7 +25,7 @@ const TeacherManagement = () => {
   const handleDelete = async () => {
     if (!deleteTeacherId) return;
     try {
-      await axios.delete(`http://localhost:5000/api/v1/teachers/${deleteTeacherId}`, {
+      await axios.delete(`https://qr-attendance-y9x7.onrender.com/api/v1/teachers/${deleteTeacherId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(prev => ({
@@ -65,7 +65,7 @@ const TeacherManagement = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/v1/dashboard/admin/teachers', {
+      const response = await axios.get('https://qr-attendance-y9x7.onrender.com/api/v1/dashboard/admin/teachers', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(response.data.data);

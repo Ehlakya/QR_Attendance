@@ -48,7 +48,7 @@ const SubjectSelection = () => {
   const fetchSections = async () => {
     try {
       // Fetch sections for the teacher's department (Mock logic or actual logic based on API)
-      const res = await axios.get(`http://localhost:5000/api/v1/sections`, {
+      const res = await axios.get(`https://qr-attendance-y9x7.onrender.com/api/v1/sections`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSections(res.data.data || []);
@@ -85,7 +85,7 @@ const SubjectSelection = () => {
 
     setIsSaving(true);
     try {
-      await axios.post('http://localhost:5000/api/v1/teachers/subjects', {
+      await axios.post('https://qr-attendance-y9x7.onrender.com/api/v1/teachers/subjects', {
         subjects: selectedSubjects,
         semester: parseInt(assignmentData.semester),
         sectionId: assignmentData.sectionId || null

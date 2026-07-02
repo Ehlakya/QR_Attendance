@@ -22,7 +22,7 @@ const SubjectAttendance = () => {
 
   const fetchSessionData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/v1/attendance/session/${qrId}`, {
+      const response = await axios.get(`https://qr-attendance-y9x7.onrender.com/api/v1/attendance/session/${qrId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setData(response.data.data);

@@ -45,7 +45,7 @@ const QRGenerator = () => {
         payload.period = data.period;
       }
 
-      const response = await axios.post('http://localhost:5000/api/v1/qr/generate', payload, {
+      const response = await axios.post('https://qr-attendance-y9x7.onrender.com/api/v1/qr/generate', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

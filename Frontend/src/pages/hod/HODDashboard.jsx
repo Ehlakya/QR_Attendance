@@ -17,7 +17,7 @@ const HODDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/v1/dashboard/teacher/stats', {
+        const response = await axios.get('https://qr-attendance-y9x7.onrender.com/api/v1/dashboard/teacher/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setStats(response.data.data);

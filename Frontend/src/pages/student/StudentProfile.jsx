@@ -26,7 +26,7 @@ const StudentProfile = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/v1/students/profile', {
+      const response = await axios.get('https://qr-attendance-y9x7.onrender.com/api/v1/students/profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = response.data.data;
@@ -104,7 +104,7 @@ const StudentProfile = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.put('http://localhost:5000/api/v1/students/profile', editForm, {
+      await axios.put('https://qr-attendance-y9x7.onrender.com/api/v1/students/profile', editForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Profile updated successfully');
@@ -124,7 +124,7 @@ const StudentProfile = () => {
     }
     setSubmitting(true);
     try {
-      await axios.put('http://localhost:5000/api/v1/students/profile/password', {
+      await axios.put('https://qr-attendance-y9x7.onrender.com/api/v1/students/profile/password', {
         oldPassword: passwordForm.oldPassword,
         newPassword: passwordForm.newPassword
       }, {

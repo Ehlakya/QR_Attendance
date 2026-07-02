@@ -30,7 +30,7 @@ const TeacherSetup = () => {
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/v1/sections');
+        const response = await axios.get('https://qr-attendance-y9x7.onrender.com/api/v1/sections');
         setSections(response.data.data || []);
       } catch (error) {
         console.error('Failed to fetch sections:', error);
@@ -72,7 +72,7 @@ const TeacherSetup = () => {
 
     setSetupLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/v1/auth/setup-teacher', data);
+      const response = await axios.post('https://qr-attendance-y9x7.onrender.com/api/v1/auth/setup-teacher', data);
       const { user, token } = response.data.data;
       login(user, token);
       toast.success('Profile setup completed successfully!');

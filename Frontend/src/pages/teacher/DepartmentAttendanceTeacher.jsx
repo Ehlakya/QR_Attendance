@@ -29,10 +29,10 @@ const DepartmentAttendanceTeacher = () => {
     const fetchData = async () => {
       try {
         const [statsRes, studentsRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/v1/dashboard/teacher/stats', {
+          axios.get('https://qr-attendance-y9x7.onrender.com/api/v1/dashboard/teacher/stats', {
             headers: { Authorization: `Bearer ${token}` }
           }),
-          axios.get('http://localhost:5000/api/v1/dashboard/teacher/students', {
+          axios.get('https://qr-attendance-y9x7.onrender.com/api/v1/dashboard/teacher/students', {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);

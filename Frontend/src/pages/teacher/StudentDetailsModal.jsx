@@ -12,7 +12,7 @@ const StudentDetailsModal = ({ studentId, onClose }) => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/dashboard/6-month-report/${studentId}`, {
+        const response = await axios.get(`https://qr-attendance-y9x7.onrender.com/api/v1/dashboard/6-month-report/${studentId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setReport(response.data.data);

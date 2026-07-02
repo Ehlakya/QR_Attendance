@@ -12,7 +12,7 @@ export const useNotifications = () => {
   const fetchNotifications = async () => {
     if (!token) return;
     try {
-      const response = await axios.get('http://localhost:5000/api/v1/notifications', {
+      const response = await axios.get('https://qr-attendance-y9x7.onrender.com/api/v1/notifications', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = response.data.data || [];
@@ -46,7 +46,7 @@ export const useNotifications = () => {
 
   const markAsRead = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/v1/notifications/${id}/read`, {}, {
+      await axios.put(`https://qr-attendance-y9x7.onrender.com/api/v1/notifications/${id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
@@ -58,7 +58,7 @@ export const useNotifications = () => {
 
   const markAllAsRead = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/v1/notifications/read-all`, {}, {
+      await axios.put(`https://qr-attendance-y9x7.onrender.com/api/v1/notifications/read-all`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));

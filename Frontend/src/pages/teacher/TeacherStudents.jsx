@@ -26,7 +26,7 @@ const TeacherStudents = () => {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/v1/dashboard/teacher/students', {
+        const response = await axios.get('https://qr-attendance-y9x7.onrender.com/api/v1/dashboard/teacher/students', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setStudents(response.data.data);

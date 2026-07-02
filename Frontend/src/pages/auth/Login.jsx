@@ -58,10 +58,10 @@ const Login = () => {
       const cleanPassword = data.password.trim();
 
       if (cleanUsername.includes('@')) {
-        endpoint = 'http://localhost:5000/api/v1/auth/admin-login';
+        endpoint = 'https://qr-attendance-y9x7.onrender.com/api/v1/auth/admin-login';
         payload = { email: cleanUsername, password: cleanPassword };
       } else {
-        endpoint = 'http://localhost:5000/api/v1/auth/student-login';
+        endpoint = 'https://qr-attendance-y9x7.onrender.com/api/v1/auth/student-login';
         payload = { registerNumber: cleanUsername, password: cleanPassword };
       }
 
@@ -105,7 +105,7 @@ const Login = () => {
 
     setIsGoogleLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/v1/auth/mock-login', {
+      const response = await axios.post('https://qr-attendance-y9x7.onrender.com/api/v1/auth/mock-login', {
         email: mockEmail,
         role: 'Teacher' // Role is determined by the DB in mock-login anyway
       });

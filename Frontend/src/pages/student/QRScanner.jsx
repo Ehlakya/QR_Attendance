@@ -31,7 +31,7 @@ const QRScanner = () => {
   const fetchActiveSessions = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/v1/qr/active', {
+      const response = await axios.get('https://qr-attendance-y9x7.onrender.com/api/v1/qr/active', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setActiveSessions(response.data.data);
@@ -91,7 +91,7 @@ const QRScanner = () => {
         qrDataStr: decodedText
       };
 
-      await axios.post('http://localhost:5000/api/v1/attendance/mark', payload, {
+      await axios.post('https://qr-attendance-y9x7.onrender.com/api/v1/attendance/mark', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

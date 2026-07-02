@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
 // In production, this should be an environment variable
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'https://qr-attendance-y9x7.onrender.com';
 
 export const useSocket = () => {
   const [socket, setSocket] = useState(null);

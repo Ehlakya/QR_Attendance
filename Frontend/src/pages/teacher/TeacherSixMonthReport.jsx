@@ -44,7 +44,7 @@ const TeacherSixMonthReport = () => {
     setIsLoadingDefault(true);
     try {
       const queryParams = new URLSearchParams(filters).toString();
-      const res = await axios.get(`http://localhost:5000/api/v1/dashboard/6-month-overview?${queryParams}`, {
+      const res = await axios.get(`https://qr-attendance-y9x7.onrender.com/api/v1/dashboard/6-month-overview?${queryParams}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDefaultOverview(res.data.data);
@@ -62,7 +62,7 @@ const TeacherSixMonthReport = () => {
     setIsSearching(true);
     setStudents([]);
     try {
-      const res = await axios.get(`http://localhost:5000/api/v1/students?search=${searchQuery}`, {
+      const res = await axios.get(`https://qr-attendance-y9x7.onrender.com/api/v1/students?search=${searchQuery}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStudents(res.data.data || []);
@@ -82,7 +82,7 @@ const TeacherSixMonthReport = () => {
     setIsLoadingReport(true);
     setStudents([]); // hide search results
     try {
-      const res = await axios.get(`http://localhost:5000/api/v1/dashboard/6-month-report/${student.id}`, {
+      const res = await axios.get(`https://qr-attendance-y9x7.onrender.com/api/v1/dashboard/6-month-report/${student.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setReportData(res.data.data);

@@ -28,7 +28,7 @@ const StudentRegistration = () => {
         sectionId: parseInt(data.sectionId)
       };
 
-      await axios.post('http://localhost:5000/api/v1/students/register', payload);
+      await axios.post('https://qr-attendance-y9x7.onrender.com/api/v1/students/register', payload);
       
       toast.success('Registration Submitted Successfully! Awaiting Teacher Approval.');
       navigate('/login');

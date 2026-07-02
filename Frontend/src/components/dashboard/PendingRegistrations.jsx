@@ -14,7 +14,7 @@ const PendingRegistrations = ({ departmentId, sectionId }) => {
 
   const fetchPendingStudents = async () => {
     try {
-      let url = 'http://localhost:5000/api/v1/students?status=Pending';
+      let url = 'https://qr-attendance-y9x7.onrender.com/api/v1/students?status=Pending';
       if (departmentId && departmentId !== '1' && departmentId !== 1) url += `&departmentId=${departmentId}`;
       if (sectionId && sectionId !== '1' && sectionId !== 1) url += `&sectionId=${sectionId}`;
 
@@ -60,7 +60,7 @@ const PendingRegistrations = ({ departmentId, sectionId }) => {
 
   const handleUpdateStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/v1/students/${id}/status`, { status }, {
+      await axios.put(`https://qr-attendance-y9x7.onrender.com/api/v1/students/${id}/status`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success(`Student ${status} successfully`);
