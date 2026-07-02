@@ -2,6 +2,11 @@ const { Client } = require('pg');
 require('dotenv').config({ path: '../../.env' }); // Adjusted to load from Backend root
 
 const createDatabase = async () => {
+  if (process.env.DATABASE_URL) {
+    console.log('DATABASE_URL is set. Skipping database creation (assuming managed remote database like NeonDB).');
+    return;
+  }
+
   const client = new Client({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'postgres',
